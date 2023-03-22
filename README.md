@@ -1,2 +1,2 @@
-# JavaSpringBoot-school
-javaSpringBoot基础的学习
+# SpringBoot-school
+SpringBoot的学习与练习
