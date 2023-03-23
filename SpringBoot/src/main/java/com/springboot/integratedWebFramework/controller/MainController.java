@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @Desription:
  * @date 2023/3/22 11:47
  */
-@Controller
+/*@Controller
 public class MainController {
 
     @ResponseBody
@@ -27,4 +27,4 @@ public class MainController {
 
     }
 
-}
+}*/
