@@ -1,0 +1,42 @@
+2023-03-25 00:50:07.631  INFO 2632 --- [main] com.springboot.Application               : Starting Application using Java 17.0.5 on Rick-yxs with PID 2632 (D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot\SpringBoot\target\classes started by AKAtravis-yxs in D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot)
+2023-03-25 00:50:07.633  INFO 2632 --- [main] com.springboot.Application               : No active profile set, falling back to default profiles: default
+2023-03-25 00:50:08.002  WARN 2632 --- [main] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.springboot]' package. Please check your configuration.
+2023-03-25 00:50:08.251  INFO 2632 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 80 (http)
+2023-03-25 00:50:08.260  INFO 2632 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-03-25 00:50:08.260  INFO 2632 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.56]
+2023-03-25 00:50:08.308  INFO 2632 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-03-25 00:50:08.308  INFO 2632 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 647 ms
+2023-03-25 00:50:08.489  WARN 2632 --- [main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates or check your Thymeleaf configuration)
+2023-03-25 00:50:08.634  INFO 2632 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 80 (http) with context path ''
+2023-03-25 00:50:08.642  INFO 2632 --- [main] com.springboot.Application               : Started Application in 1.336 seconds (JVM running for 1.746)
+2023-03-25 01:15:37.514  INFO 376 --- [main] com.springboot.Application               : Starting Application using Java 17.0.5 on Rick-yxs with PID 376 (D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot\SpringBoot\target\classes started by AKAtravis-yxs in D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot)
+2023-03-25 01:15:37.517  INFO 376 --- [main] com.springboot.Application               : No active profile set, falling back to default profiles: default
+2023-03-25 01:15:37.903  WARN 376 --- [main] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.springboot]' package. Please check your configuration.
+2023-03-25 01:15:38.148  INFO 376 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 80 (http)
+2023-03-25 01:15:38.155  INFO 376 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-03-25 01:15:38.155  INFO 376 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.56]
+2023-03-25 01:15:38.201  INFO 376 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-03-25 01:15:38.201  INFO 376 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 654 ms
+2023-03-25 01:15:38.376  WARN 376 --- [main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates or check your Thymeleaf configuration)
+2023-03-25 01:15:38.522  INFO 376 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 80 (http) with context path ''
+2023-03-25 01:15:38.530  INFO 376 --- [main] com.springboot.Application               : Started Application in 1.343 seconds (JVM running for 1.709)
+2023-03-25 01:15:47.104  INFO 376 --- [http-nio-80-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2023-03-25 01:15:47.104  INFO 376 --- [http-nio-80-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2023-03-25 01:15:47.105  INFO 376 --- [http-nio-80-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2023-03-25 01:15:47.116  WARN 376 --- [http-nio-80-exec-1] o.s.web.servlet.PageNotFound             : No mapping for GET /index
+2023-03-25 01:15:51.551  INFO 376 --- [http-nio-80-exec-2] c.s.logSystem.controller.MainController  : 用户访问了一次页面
+2023-03-25 01:17:35.044  INFO 9076 --- [main] com.springboot.Application               : Starting Application using Java 17.0.5 on Rick-yxs with PID 9076 (D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot\SpringBoot\target\classes started by AKAtravis-yxs in D:\back-end learning\java-exercise\JavaEE\javaSpringBoot-yxs\javaSpringBoot)
+2023-03-25 01:17:35.046  INFO 9076 --- [main] com.springboot.Application               : No active profile set, falling back to default profiles: default
+2023-03-25 01:17:35.418  WARN 9076 --- [main] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.springboot]' package. Please check your configuration.
+2023-03-25 01:17:35.657  INFO 9076 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 80 (http)
+2023-03-25 01:17:35.672  INFO 9076 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-03-25 01:17:35.673  INFO 9076 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.56]
+2023-03-25 01:17:35.731  INFO 9076 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-03-25 01:17:35.731  INFO 9076 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 655 ms
+2023-03-25 01:17:35.915  WARN 9076 --- [main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates or check your Thymeleaf configuration)
+2023-03-25 01:17:36.061  INFO 9076 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 80 (http) with context path ''
+2023-03-25 01:17:36.069  INFO 9076 --- [main] com.springboot.Application               : Started Application in 1.367 seconds (JVM running for 1.779)
+2023-03-25 01:17:49.562  INFO 9076 --- [http-nio-80-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2023-03-25 01:17:49.562  INFO 9076 --- [http-nio-80-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2023-03-25 01:17:49.563  INFO 9076 --- [http-nio-80-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2023-03-25 01:17:49.595  INFO 9076 --- [http-nio-80-exec-1] c.s.logSystem.controller.MainController  : 用户访问了一次页面

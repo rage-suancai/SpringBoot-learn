@@ -9,7 +9,7 @@ import lombok.Data;
  * @Desription:
  * @date 2023/3/24 15:16
  */
-@Data
+/*@Data
 public class UserData {
 
     Integer id;
@@ -17,4 +17,4 @@ public class UserData {
     String role;
     String password;
 
-}
+}*/
