@@ -1,4 +1,4 @@
-SpringBoot一站式开发
+SpringBoot一站式开发(旧版待更新)
 
 官网: https://spring.io/projects/spring-boot
 
