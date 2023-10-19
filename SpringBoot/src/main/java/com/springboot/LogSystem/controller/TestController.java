@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 
 @Slf4j
 @Controller
-public class TestController1 {
+public class TestController {
 
 //    @PostConstruct
 //    public void init() {
