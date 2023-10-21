@@ -110,7 +110,7 @@
                     }
 ```
 
-最后 我们来尝试为我们的网站实现一个邮件注册功能 首先明确验证流程: `请求验证码 -> 生成验证码(临时有效 注意设定过期时间)-> 用户输入验证码并填写注册信息 -> 验证通过注册成功`
+最后 我们来尝试为我们的网站实现一个邮件注册功能 首先明确验证流程: `请求验证码 -> 生成验证码(临时有效 注意设定过期时间) -> 用户输入验证码并填写注册信息 -> 验证通过注册成功`
 
 接着我们就来着手写一下
 
@@ -337,17 +337,227 @@ Swagger的主要功能如下:
 
 <img src="https://image.itbaima.net/markdown/2023/07/17/whLprBimgTqWxFR.png"/>
 
+这就非常方便了 不仅前端人员可以快速查询接口定义 我们自己也可以在线进行接口测试 直接抛弃PostMan之类的软件了
 
+虽然Swagger的UI界面已经可以很好地展示后端提供的接口信息了 但是非常的混乱 我们来看看如何配置接口的一些描述信息
+首先我们的页面肯定要展示一下这个文档的一些信息 只需要一个Bean就能搞定:
 
+```java
+                    @Bean
+                    public OpenAPI springDocOpenAPI() {
+    
+                            return new OpenAPI().info(new Info()
+                                            .title("图书管理系统 - 在线API接口文档") // 设置API文档网站标题
+                                            .description("这是一个图书管理系统的后端API文档，欢迎前端人员查阅！") // 网站介绍
+                                            .version("2.0") // 当前API版本
+                                            .license(new License().name("我的B站个人主页") // 遵循的协议 这里拿来写其他的也行
+                                            .url("https://space.bilibili.com/37737161")));
+                            
+                    }
+```
 
+这样我们的页面中就会展示自定义的文本信息了:
 
+<img src="https://image.itbaima.net/markdown/2023/07/17/ZHqL7UsermIbipv.png"/>
 
+```java
+                    // 使用@Tag注解来添加Controller描述信息
+                    @Tag(name = "账户验证相关", description = "包括用户登录,注册,验证码请求等操作")
+                    public class TestController {
+                    	...
+                    }
+```
 
+我们可以直接在类名称上面添加@Tag注解 并填写相关信息 来为当前的Controller设置描述信息 接着我们可以为所有的请求映射配置描述信息:
 
+```java
+                    @ApiResponses({
+                           @ApiResponse(responseCode = "200", description = "测试成功"),
+                           @ApiResponse(responseCode = "500", description = "测试失败") // 不同返回状态码描述
+                    })
+                    @Operation(summary = "请求用户数据测试接口") // 接口功能描述
+                    @ResponseBody
+                    @GetMapping("/hello")
+                    // 请求参数描述和样例
+                    public String hello(@Parameter(description = "测试文本数据", example = "KFCvivo50") @RequestParam String text) {
+                        return "Hello World";
+                    }
+```
 
+对于那些不需要展示在文档中的接口 我们也可以将其忽略掉:
 
+```java
+                    @Hidden
+                    @ResponseBody
+                    @GetMapping("/hello")
+                    public String hello() {
+                        return "Hello World";
+                    }
+```
 
+对于实体类 我们也可以编写对应的API接口文档:
 
+```java
+                    @Data
+                    @Schema(description = "用户信息实体类")
+                    public class User {
+    
+                        @Schema(description = "用户编号")
+                        int id;
+                        @Schema(description = "用户名称")
+                        String name;
+                        @Schema(description = "用户邮箱")
+                        String email;
+                        @Schema(description = "用户密码")
+                        String password;
+                        
+                    }
+```
 
+这样 我们就可以在文档中查看实体类简介以及各个属性的介绍了
 
+不过 这种文档只适合在开发环境下生成 如果是生产环境 我们需要关闭文档:
 
+```yaml
+                    springdoc:
+                        api-docs:
+                          enabled: false
+```
+
+这样就可以关闭了
+
+### 项目运行监控(选学)
+我们的项目开发完成之后 肯定是需要上线运行的 不过项目的运行过程中 我们可能需要对其进行监控 从而实时观察其运行状态 并在发生问题时做出对应的调整 因此 集成项目运行监控就很有必要了
+
+SpringBoot框架提供了spring-boot-starter-actuator模块来实现监控效果:
+
+```xml
+                    <dependency>
+                       <groupId>org.springframework.boot</groupId>
+                       <artifactId>spring-boot-starter-actuator</artifactId>
+                    </dependency>
+```
+
+添加好之后 Actuator会自动注册一些接口用于查询当前SpringBoot应用程序的状态
+官方文档如下: https://docs.spring.io/spring-boot/docs/3.1.1/actuator-api/htmlsingle/#overview
+
+默认情况下 所有Actuator自动注册的接口路径都是`/actuatore/{}`格式的(可在配置文件中修改) 比如我们想要查询当前服务器的健康状态
+就可以访问这个接口: http://localhost:8080/actuator/health 结果会以JSON格式返回给我们:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/h2dYo4sKPSfbGpq.png"/>
+
+直接访问: http://localhost:8080/actuator根路径 可以查看当前已经开启的所有接口 默认情况下只开启以下接口:
+
+```json
+                    {
+                      "_links": {
+                      	"self": {"href":"http://localhost:8080/actuator","templated":false}, // actuator自己的信息
+                      	"health-path":{"href":"http://localhost:8080/actuator/health/{*path}","templated":true},
+                      	"health":{"href":"http://localhost:8080/actuator/health","templated":false} // 应用程序健康情况监控
+                     	}
+                    }
+```
+
+我们可以来修改一下配置文件 让其暴露全部接口:
+
+```yaml
+                    management:
+                        endpoints:
+                          web:
+                            exposure:
+                              include: '*' # 使用*表示暴露全部接口
+```
+
+重启服务器 再次获取可用接口就可以看到全部的信息了 这里就不全部搬出来了 只列举一些常用的:
+
+```json
+                    {
+                      "_links": {
+                        // 包含Actuator自己的信息
+                        "self": {"href":"http://localhost:8080/actuator","templated":false},
+                        // 已注册的Bean信息
+                        "beans":{"href":"http://localhost:8080/actuator/beans","templated":false},
+                        // 应用程序健康情况监控
+                        "health":{"href":"http://localhost:8080/actuator/health","templated":false},
+                        "health-path":{"href":"http://localhost:8080/actuator/health/{*path}","templated":true},
+                        // 应用程序运行信息
+                        "info":{"href":"http://localhost:8080/actuator/info","templated":false},
+                        // 系统环境相关信息
+                        "env": {"href":"http://localhost:8080/actuator/env","templated":false},
+                        "env-toMatch":{"href":"http://localhost:8080/actuator/env/{toMatch}","templated":true},
+                        // 日志相关信息
+                        "loggers":{"href":"http://localhost:8080/actuator/loggers","templated":false},
+                        "loggers-name":{"href":"http://localhost:8080/actuator/loggers/{name}","templated":true},
+                        // 快速获取JVM堆转储文件
+                        "heapdump":{"href":"http://localhost:8080/actuator/heapdump","templated":false},
+                        // 快速获取JVM线程转储信息
+                        "threaddump":{"href":"http://localhost:8080/actuator/threaddump","templated":false},
+                        // 计划任务相关信息
+                        "scheduledtasks":{"href":"http://localhost:8080/actuator/scheduledtasks","templated":false},
+                        // 请求映射相关信息
+                        "mappings":{"href":"http://localhost:8080/actuator/mappings","templated":false},
+                        ...
+                      }
+                    }
+```
+
+比如我们可以通过 http://localhost:8080/actuator/info 接口查看当前系统运行环境信息:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/2KyfArzj7uEqliC.png"/>
+
+我们发现 这里得到的数据是一个空的 这是因为我们还需要单独开启对应模块才可以:
+
+```yaml
+                    management:
+                      endpoints:
+                        web:
+                          exposure:
+                            include: '*'
+                      # 开启某些默认为false的信息
+                      info:
+                        env:
+                          enabled: true
+                        os:
+                          enabled: true
+                        java:
+                          enabled: true
+```
+
+再次请求 就能获得运行环境相关信息了 比如这里的Java版本, JVM信息, 操作系统信息等:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/7tsbxvozYueIlJP.png"/>
+
+我们也可以让health显示更加详细的系统状态信息 这里我们开启一下配置:
+
+```yaml
+                    management:
+                    	...
+                      endpoint:
+                        health:
+                          show-details: always # 展示详细内容
+                        env:
+                          show-values: always # 总是直接展示值
+```
+
+现在就能查看当前系统占用相关信息了 比如下面的磁盘占用, 数据库等信息:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/Tyxmgv1b4jdqVFG.png"/>
+
+包括完整的系统环境信息 比如我们配置的服务器8080端口:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/XiorDh692m83KAP.png"/>
+
+我们只需要通过这些接口就能快速获取到当前应用程序的运行信息了
+
+高级一点的还有线程转储和堆内存转储文件直接生成 便于我们对Java程序的运行情况进行分析
+这里我们获取一下堆内存转储文件: http://localhost:8080/actuator/heapdump 文件下载之后直接使用IDEA就能打开:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/m8gNK1GjW3UhAnQ.png"/>
+
+可以看到其中创建的byte数组对象计数达到了72020个 其中我们自己的TestController对象只有有一个:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/BzZtoIM9vGgiArp.png"/>
+
+以及对应的线程转储信息 也可以通过 http://localhost:8080/actuator/threaddump 直接获取:
+
+<img src="https://image.itbaima.net/markdown/2023/07/16/LK6TZlDyxIJ7jqX.png"/>

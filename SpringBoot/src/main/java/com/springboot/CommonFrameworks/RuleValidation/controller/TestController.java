@@ -1,6 +1,7 @@
-package com.springboot.MailModule.controller;
+package com.springboot.CommonFrameworks.RuleValidation.controller;
 
-import org.hibernate.validator.constraints.Length;
+import com.springboot.CommonFrameworks.RuleValidation.entity.Account;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Validated
 @Controller
-public class TestController2 {
+public class TestController {
 
     /*@ResponseBody
     @PostMapping("/submit")
@@ -32,16 +33,25 @@ public class TestController2 {
             return "请求失败";
         }
 
-
     }*/
 
-    @ResponseBody
+    /*@ResponseBody
     @PostMapping("/submit")
     public String submit(@Length(min=3) String username,
                          @Length(min=10) String password) {
 
         System.out.println(username.substring(3));
         System.out.println(password.substring(2, 10)); return "请求成功";
+
+    }*/
+
+    @ResponseBody
+    @PostMapping("/submit")
+    public String submit(@Valid Account account) {
+
+        System.out.println(account.getUsername().substring(3));
+        System.out.println(account.getPassword().substring(2, 10));
+        return "请求成功";
 
     }
 

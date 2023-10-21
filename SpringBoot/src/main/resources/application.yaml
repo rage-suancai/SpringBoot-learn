@@ -4,7 +4,7 @@ server:
 spring:
 
   profiles:
-    active: `@environment@`
+    active: '@environment@'
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

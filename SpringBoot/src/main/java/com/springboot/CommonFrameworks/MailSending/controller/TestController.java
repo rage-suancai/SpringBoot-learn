@@ -1,4 +1,4 @@
-package com.springboot.MailModule.controller;
+package com.springboot.CommonFrameworks.MailSending.controller;
 
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-public class TestController1 {
+public class TestController {
 
     @Resource
     private JavaMailSender sender;
