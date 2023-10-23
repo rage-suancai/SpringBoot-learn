@@ -15,13 +15,13 @@ spring:
   mvc:
     static-path-pattern: /static/**
 
-  security:
-    user:
-      name: 'admin'
-      password: '123456'
-      roles:
-        - admin
-        - user
+#  security:
+#    user:
+#      name: 'admin'
+#      password: '123456'
+#      roles:
+#        - admin
+#        - user
 
 #  mail:
 #    host: smtp.163.com

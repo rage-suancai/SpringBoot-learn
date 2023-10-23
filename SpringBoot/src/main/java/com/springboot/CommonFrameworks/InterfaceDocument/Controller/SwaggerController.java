@@ -1,4 +1,4 @@
-package com.springboot.CommonFrameworks.InterfaceDocument.Controller;
+/**package com.springboot.CommonFrameworks.InterfaceDocument.Controller;
 
 import com.springboot.CommonFrameworks.InterfaceDocument.entity.Account;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -47,4 +47,4 @@ public class SwaggerController {
         return "Hello Swagger";
     }
 
-}
+}**/

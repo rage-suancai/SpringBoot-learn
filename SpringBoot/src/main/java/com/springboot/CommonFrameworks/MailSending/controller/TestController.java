@@ -1,4 +1,4 @@
-package com.springboot.CommonFrameworks.MailSending.controller;
+/**package com.springboot.CommonFrameworks.MailSending.controller;
 
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
@@ -43,4 +43,4 @@ public class TestController {
 
     }
 
-}
+}**/
