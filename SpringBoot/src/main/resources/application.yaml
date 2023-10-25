@@ -28,6 +28,11 @@ spring:
 #    username: javastudy111@163.com
 #    password: AZJTOAWZESLMHTNI
 
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
 # test:
 #   data: yyds
 

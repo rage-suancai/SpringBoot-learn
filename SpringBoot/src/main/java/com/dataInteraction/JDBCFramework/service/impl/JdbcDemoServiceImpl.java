@@ -49,10 +49,10 @@ public class JdbcDemoServiceImpl implements JdbcDemoService {
     public void contextLoads4() {
 
         SimpleJdbcInsert simple = new SimpleJdbcInsert(dataSource)
-                .withTableName("user")
+                .withTableName("db_user")
                 .usingGeneratedKeyColumns("id");
 
-        Map<String, Object> user = new HashMap<>(2);
+        Map<String, Object> user = new HashMap<>(1);
         user.put("name", "bod"); user.put("email", "911@qq.com"); user.put("password", "123456");
         Number number = simple.executeAndReturnKey(user);
 

@@ -189,6 +189,502 @@ SpringJDBC为我们提供了一个非常方便的JdbcTemplate类 它封装了常
 官网: https://spring.io/projects/spring-data-jpa
 
 #### 使用JPA快速上手
+同样的 我们只需要导入stater依赖即可:
+
+```xml
+                    <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-data-jpa</artifactId>
+                    </dependency>
+```
+
+接着我们可以直接创建一个类 比如用户类 我们只需要把一个账号对应的属性全部定义好即可:
+
+```java
+                    @Data
+                    public class Account {
+    
+                        int id;
+                        String username;
+                        String password;
+                        
+                    }
+```
+
+接着 我们可以通过注解形式 在属性上添加数据库映射关系 这样就能够让JPA知道我们的实体类对应的数据库表长啥样 这里用到了很多注解:
+
+```java
+                    @Data
+                    @Entity // 表示这个类是一个实体类
+                    @Table(name = "account") // 对应的数据库中表名称
+                    public class Account {
+                    
+                        @GeneratedValue(strategy = GenerationType.IDENTITY) // 生成策略 这里配置为自增
+                        @Column(name = "id") // 对应表中id这一列
+                        @Id // 此属性为主键
+                        int id;
+                    
+                        @Column(name = "username") // 对应表中username这一列
+                        String username;
+                    
+                        @Column(name = "password") // 对应表中password这一列
+                        String password;
+                        
+                    }
+```
+
+接着我们来修改一下配置文件 把日志打印给打开:
+
+```yaml
+                    spring:
+                        jpa:
+                          # 开启SQL语句执行日志信息
+                          show-sql: true
+                          hibernate:
+                            # 配置为检查数据库表结构 没有时会自动创建
+                            ddl-auto: update
+```
+
+`ddl-auto`属性用于设置自动表定义 可以实现自动在数据库中为我们创建一个表 表的结构会根据我们定义的实体类决定 它有以下几种:
+- `none`: 不执行任何操作 数据库表结构需要手动创建
+- `create`: 框架在每次运行时都会删除所有表 并重新创建
+- `create-drop`: 框架在每次运行时都会删除所有表 然后再创建 但在程序结束时会再次删除所有表
+- `update`: 框架会检查数据库表结构 如果与实体类定义不匹配 则会做相应的修改 以保持它们的一致性
+- `validate`: 框架会检查数据库表结构与实体类定义是否匹配 如果不匹配 则会抛出异常
+
+这个配置置顶的作用是为了避免手动管理数据库表结构 使开发者可以更方便地进行开发和测试 但在生产环境中 更推荐使用数据库迁移工具来管理表结构的变更
+
+我们可以在日志中发现 在启动时执行了如下SQL语句:
+
+<img src="https://image.itbaima.net/markdown/2023/07/20/kABZVhJ8vjKSqzT.png"/>
+
+我们的数据库中对应的表已经自动创建好了
+
+我们接着来看如何访问我们的表 我们需要创建一个Repository实现类:
+
+```java
+                    @Repository
+                    public interface AccountRepository extends JpaRepository<Account, Integer> {
+    
+                    }
+```
+
+注意: JpaRepository有两个泛型 前者是具体操作的对象实体 也就是对应的表 后者是ID的类型
+接口中已经定义了比较常用的数据库操作 编写接口继承即可 我们可以直接注入此接口获得实现类:
+
+```java
+                    @Resource
+                    AccountRepository repository;
+                    
+                    @Test
+                    void contextLoads() {
+                        
+                        Account account = new Account();
+                        account.setUsername("小红");
+                        account.setPassword("1234567");
+                        System.out.println(repository.save(account).getId()); // 使用save来快速插入数据 并且会返回插入的对象 如果存在自增ID 对象的自增id属性会自动被赋值 这就很方便了
+                            
+                    }
+```
+
+执行结果如下:
+
+<img src="https://image.itbaima.net/markdown/2023/07/20/ksI3J5eidzTrvyL.png"/>
+
+同时 查询操作也很方便:
+
+```java
+                    @Test
+                    void contextLoads() {
+    
+                      	// 默认通过通过ID查找的方法 并且返回的结果是Optional包装的对象 非常人性化
+                        repository.findById(1).ifPresent(System.out::println);
+                        
+                    }
+```
+
+得到结果:
+
+<img src="https://image.itbaima.net/markdown/2023/07/20/TRHOWbop267Al4Q.png"/>
+
+包括常见的一些计数,删除操作等都包含在里面 仅仅配置应该接口就能完美实现增删改查:
+
+<img src="https://image.itbaima.net/markdown/2023/07/21/uIBciLqFsH5tdDR.png"/>
+
+我们发现 使用了JPA之后 整个项目的代码中没有出现任何的SQL语句 可以说是非常方便了 JPA依靠我们提供的注解信息自动完成了所有信息的映射和关联
+
+相比Mybatis JPA几乎就是一个全自动的ORM框架 而Mybatis则顶多算是半自动ORM框架
+
+#### 方法名称拼接自定义SQL
+虽然接口预置的方法使用起来非常方便 但是如果我们需要进行条件查询等操作或是一些判断 就需要自定义一些方法来实现 同样的
+我们不需要编写SQL语句 而是通过方法名称的拼接来实现条件判断 这里列出了所有支持的条件判断名称:
+
+| 属性           | 拼接方法名称示例                   | 执行的语句                                                        |     
+|--------------|----------------------------|--------------------------------------------------------------|
+| Distinct       | findDistinctByLastnameAndFirstname | select distinct … where x.lastname = ?1 and x.firstname = ?2 |
+| And          | findByLastnameAndFirstname | ️… where x.lastname = ?1 and x.firstname = ?2                |
+| Is，Equals | findByFirstname,findByFirstnameIs,findByFirstnameEquals | … where x.firstname = ?1                                     |
+| Between | 	findByStartDateBetween  | … where x.startDate between ?1 and ?2                        |
+| LessThan | findByAgeLessThan  | … where x.age < ?1                                           |
+| LessThanEqual | 	findByAgeLessThanEqual  | … where x.age <= ?1                                          |
+| GreaterThan | findByAgeGreaterThan  | … where x.age > ?1                                           |
+| GreaterThanEqual | findByAgeGreaterThanEqual  | … where x.age >= ?1                                          |
+| After | findByStartDateAfter  | 	… where x.startDate > ?1                                    |
+| Before | findByStartDateBefore  | … where x.startDate < ?1                                     |
+| IsNull，Null | findByAge(Is)Null  | … where x.age is null                                        |
+| IsNotNull，NotN | findByAge(Is)NotNull  | … where x.age not null                                       |
+| Like | findByFirstnameLike  | … where x.firstname like ?1                                  |
+| NotLike | findByFirstnameNotLike | … where x.firstname not like ?1                              |
+| StartingWith | findByFirstnameStartingWith  | … where x.firstname like ?1（参数与附加%绑定） |
+| EndingWith | findByFirstnameEndingWith  | … where x.firstname like ?1（参数与前缀%绑定） |
+| Containing | findByLastnameOrFirstname  | … where x.lastname = ?1 or x.firstname = ?2                  |
+| OrderBy | findByAgeOrderByLastnameDesc | … where x.lastname = ?1 or x.firstname = ?2                  |
+| Not | findByLastnameNot  | … where x.age = ?1 order by x.lastname desc |
+| In | findByAgeIn(Collection ages) | … where x.age in ?1 |
+| NotIn | findByAgeNotIn(Collection ages)  | … where x.age not in ?1 |
+| True | findByActiveTrue | … where x.active = true |
+| False | findByActiveFalse | … where x.active = false  |
+| IgnoreCase | findByFirstnameIgnoreCase | … where UPPER(x.firstname) = UPPER(?1) |
+
+比如我们想要实现根据用户名模糊匹配查找用户:
+
+```java
+                    @Repository
+                    public interface AccountRepository extends JpaRepository<Account, Integer> {
+                    
+                        // 按照表中的规则进行名称拼接 不用刻意去记 IDEA会有提示
+                        List<Account> findAllByUsernameLike(String str);
+                        
+                    }
+```
+
+我们来测试一下:
+
+```java
+                    @Test
+                    void contextLoads() {
+                        repository.findAllByUsernameLike("%明%").forEach(System.out::println);
+                    }
+```
+
+<img src="https://image.itbaima.net/markdown/2023/07/21/mioZaUk7Yj3QDxb.png"/>
+
+又比如我们想同时根据用户名和ID一起查询:
+
+```java
+                    @Repository
+                    public interface AccountRepository extends JpaRepository<Account, Integer> {
+    
+                        List<Account> findAllByUsernameLike(String str);
+                    
+                        Account findByIdAndUsername(int id, String username);
+                        // 也可以使用Optional类进行包装 Optional<Account> findByIdAndUsername(int id, String username);
+    
+                    }
+```
+
+```java
+                    @Test
+                    void contextLoads() {
+                        System.out.println(repository.findByIdAndUsername(1, "小明"));
+                    }
+```
+
+比如我们想要判断数据库中是否存在某个ID的用户:
+
+```java
+                    @Repository
+                    public interface AccountRepository extends JpaRepository<Account, Integer> {
+    
+                        List<Account> findAllByUsernameLike(String str);
+                        Account findByIdAndUsername(int id, String username);
+                        // 使用exists判断是否存在
+                        boolean existsAccountById(int id);
+                        
+                    }
+```
+
+注意自定义条件操作的方法名称一定要遵循规则 不然会出现异常:
+
+```log
+                    Caused by: org.springframework.data.repository.query.QueryCreationException: Could not create query for public abstract  ...
+```
+
+有了这些操作 我们在编写一些简单SQL的时候就很方便了 用久了甚至直接忘记SQL怎么写
+
+#### 关联查询
+在实际开发中 比较常见的场景还有关联查询 也就是我们会在表中添加一个外键字段 而此外键字段有指向了另一个表中的数据 当我们查询数据时 可能会需要将关联数据也一并获取
+比如我们想要查询某个用户的详细信息 一般用户简略信息会单独存放一个表 而用户详细信息会单独存放在另一个表中 当然 除了用户详细信息之外
+可能在某些电商平台还会有用户的购买记录,用户的购物车 交流社区中的用户帖子,用户评论等 这些都是需要根据用户信息进行关联查询的内容
+
+<img src="https://image.itbaima.net/markdown/2023/03/06/WnPEmdR2sDLuwGN.jpg"/>
+
+我们知道 在JPA 每张表实际上就是一个实体类的映射 而表之间的关联关系 也可以看作对象之间的依赖关系
+比如用户表中包含了用户详细信息的ID字段作为外键 那么实际上就是用户表实体类中包括了用户详细信息实体对象:
+
+```java
+                    @Data
+                    @Entity
+                    @Table(name = "users_detail")
+                    public class AccountDetail {
+                    
+                        @Column(name = "id")
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        @Id
+                        int id;
+                    
+                        @Column(name = "address")
+                        String address;
+                    
+                        @Column(name = "email")
+                        String email;
+                    
+                        @Column(name = "phone")
+                        String phone;
+                    
+                        @Column(name = "real_name")
+                        String realName;
+                        
+                    }
+```
+
+而用户信息和用户详细信息之间形成了一对一的关系 那么这时我们就可以直接在类中指定这种关系:
+
+```java
+                    @Data
+                    @Entity
+                    @Table(name = "users")
+                    public class Account {
+                    
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        @Column(name = "id")
+                        @Id
+                        int id;
+                    
+                        @Column(name = "username")
+                        String username;
+                    
+                        @Column(name = "password")
+                        String password;
+                    
+                        @JoinColumn(name = "detail_id") // 指定存储外键的字段名称
+                        @OneToOne // 声明为一对一关系
+                        AccountDetail detail;
+                        
+                    }
+```
+
+在修改实体类信息后 我们发现在启动时也进行了更新 日志如下:
+
+```log
+                    Hibernate: alter table users add column detail_id integer
+                    Hibernate: create table users_detail (id integer not null auto_increment, address varchar(255), email varchar(255), phone varchar(255), real_name varchar(255), primary key (id)) engine=InnoDB
+                    Hibernate: alter table users add constraint FK7gb021edkxf3mdv5bs75ni6jd foreign key (detail_id) references users_detail (id)
+```
+
+是不是感觉非常方便 都懒得去手动改表结构了
+
+接着我们往用户详细信息中添加一些数据 一会我们可以直接进行查询:
+
+```java
+                    @Test
+                    void pageAccount() {
+                        repository.findById(1).ifPresent(System.out::println);
+                    }
+```
+
+查询后 可以发现 得到如下结果:
+
+```log
+                    Hibernate: select account0_.id as id1_0_0_, account0_.detail_id as detail_i4_0_0_, account0_.password as password2_0_0_, account0_.username as username3_0_0_, accountdet1_.id as id1_1_1_, accountdet1_.address as address2_1_1_, accountdet1_.email as email3_1_1_, accountdet1_.phone as phone4_1_1_, accountdet1_.real_name as real_nam5_1_1_ from users account0_ left outer join users_detail accountdet1_ on account0_.detail_id=accountdet1_.id where account0_.id=?
+                    Account(id=1, username=Test, password=123456, detail=AccountDetail(id=1, address=四川省成都市青羊区, email=8371289@qq.com, phone=1234567890, realName=本伟))
+```
+
+也就是 在建立关系之后 我们查询Account对象时 会自动将关联数据的结果也一并进行查询
+
+那要是我们只想要Account的数据 不想要用户详细信息数据怎么办呢? 我希望在我要用的时候再获取详细信息 这样可以节省一些网络开销 我们可以设置懒加载 这样只有在需要时才会向数据库获取
+
+```java
+                    @JoinColumn(name = "detail_id")
+                    @OneToOne(fetch = FetchType.LAZY) // 将获取类型改为LAZY
+                    AccountDetail detail;
+```
+
+接着我们测试一下:
+
+```java
+                    @Transactional // 懒加载属性需要在事务环境下获取 因为repository方法调用完后Session会立即关闭
+                    @Test
+                    void pageAccount() {
+    
+                        repository.findById(1).ifPresent(account -> {
+                            System.out.println(account.getUsername()); // 获取用户名
+                            System.out.println(account.getDetail()); // 获取详细信息(懒加载)
+                        });
+                        
+                    }
+```
+
+接着我们来看看控制台输出了什么:
+
+```log
+                    Hibernate: select account0_.id as id1_0_0_, account0_.detail_id as detail_i4_0_0_, account0_.password as password2_0_0_, account0_.username as username3_0_0_ from users account0_ where account0_.id=?
+                    Test
+                    Hibernate: select accountdet0_.id as id1_1_0_, accountdet0_.address as address2_1_0_, accountdet0_.email as email3_1_0_, accountdet0_.phone as phone4_1_0_, accountdet0_.real_name as real_nam5_1_0_ from users_detail accountdet0_ where accountdet0_.id=?
+                    AccountDetail(id=1, address=四川省成都市青羊区, email=8371289@qq.com, phone=1234567890, realName=卢本)
+```
+
+可以看到 获取用户名之前 并没有去查询用户的详细信息 而是当我们获取详细信息时才进行查询并返回AccountDetail对象
+
+那么我们是否也可以在添加数据时 利用实体类之间的关联信息 一次性添加两张表的数据呢? 可以 但是我们需要稍微修改一下级联关联操作设定:
+
+```java
+                    @JoinColumn(name = "detail_id")
+                    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 设置关联操作为ALL
+                    AccountDetail detail;
+```
+
+- ALL: 所有操作都进行关联操作
+- PERSIST: 插入操作时才进行关联操作
+- REMOVE: 删除操作时才进行关联操作
+- MERGE: 修改操作时才进行关联操作
+
+可以多个并存 接着我们来进行一下测试:
+
+```java
+                    @Test
+                    void addAccount() {
+                    
+                        Account account = new Account();
+                        AccountDetail detail = new AccountDetail();
+                        
+                        account.setUsername("Nike");
+                        account.setPassword("123456");
+                        
+                        detail.setAddress("重庆市渝中区解放碑");
+                        detail.setPhone("1234567890");
+                        detail.setEmail("73281937@qq.com");
+                        detail.setRealName("张三");
+                        
+                      	account.setDetail(detail);
+                        account = repository.save(account);
+                        
+                        System.out.println("插入时 自动生成的主键ID为: " + account.getId() + " 外键ID为: " + account.getDetail().getId());
+                        
+                    }
+```
+
+可以看到日志结果:
+
+```log
+                    Hibernate: insert into users_detail (address, email, phone, real_name) values (?, ?, ?, ?)
+                    Hibernate: insert into users (detail_id, password, username) values (?, ?, ?)
+                    插入时 自动生成的主键ID为: 6 外键ID为: 3
+```
+
+结束后会发现数据库中两张表都同上存在数据
+
+接着我们来看一下一对多关联 比如每个用户的成绩信息:
+
+```java
+                    @JoinColumn(name = "uid") // 注意这里的name指的是Score表中的uid字段对应的就是当前的主键 会将uid外键设置为当前的主键
+                    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 在移除Account时 一并移除所有的成绩信息 依然使用懒加载
+                    List<Score> scoreList;
+```
+
+```java
+                    @Data
+                    @Entity
+                    @Table(name = "users_score") // 成绩表 注意只存成绩 不存学科信息 学科信息id做外键
+                    public class Score {
+                    
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        @Column(name = "id")
+                        @Id
+                        int id;
+                    
+                        @OneToOne // 一对一对应到学科上
+                        @JoinColumn(name = "cid")
+                        Subject subject;
+                    
+                        @Column(name = "socre")
+                        double score;
+                    
+                        @Column(name = "uid")
+                        int uid;
+                        
+                    }
+```
+
+```java
+                    @Data
+                    @Entity
+                    @Table(name = "subjects") // 学科信息表
+                    public class Subject {
+                    
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        @Column(name = "cid")
+                        @Id
+                        int cid;
+                    
+                        @Column(name = "name")
+                        String name;
+                    
+                        @Column(name = "teacher")
+                        String teacher;
+                    
+                        @Column(name = "time")
+                        int time;
+                        
+                    }
+```
+
+数据库中填写相应数据 接着我们就可以查询用户的成绩信息了:
+
+```java
+                    @Transactional
+                    @Test
+                    void test() {
+    
+                        repository.findById(1).ifPresent(account -> {
+                            account.getScoreList().forEach(System.out::println);
+                        });
+                        
+                    }
+```
+
+成功得到用户所有的成绩信息 包括得分和学科信息
+
+同样的 我们还可以将对应成绩中的教师信息单独分出一张表存储 并建立多对一的关系 因为多门课程可能由同一个老师教授(千万别搞晕了 一定要理清楚关联关系 同时也是考验你的基础扎不扎实)
+
+```java
+                    @ManyToOne(fetch = FetchType.LAZY)
+                    @JoinColumn(name = "tid") // 存储教师ID的字段 和一对一是一样的 也会当前表中创个外键
+                    Teacher teacher;
+```
+
+接着就是教师实体类了:
+
+```java
+                    @Data
+                    @Entity
+                    @Table(name = "teachers")
+                    public class Teacher {
+                    
+                        @Column(name = "id")
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        @Id
+                        int id;
+                    
+                        @Column(name = "name")
+                        String name;
+                    
+                        @Column(name = "sex")
+                        String sex;
+                        
+                    }
+```
+
 
 
 
