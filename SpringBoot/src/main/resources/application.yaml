@@ -28,10 +28,14 @@ spring:
 #    username: javastudy111@163.com
 #    password: AZJTOAWZESLMHTNI
 
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # test:
 #   data: yyds

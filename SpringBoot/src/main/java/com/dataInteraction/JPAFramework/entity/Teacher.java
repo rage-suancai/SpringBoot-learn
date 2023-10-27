@@ -3,23 +3,20 @@
 import jakarta.persistence.*;
 import lombok.Data;
 
-@Table(name = "db_account_detail")
+@Table(name = "db_teacher")
 @Entity
 @Data
-public class AccountDetail {
+public class Teacher {
 
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     Integer id;
 
-    @Column(name = "address")
-    String address;
+    @Column(name = "name")
+    String name;
 
-    @Column(name = "phone")
-    String phone;
-
-    @Column(name = "real_name")
-    String realName;
+    @Column(name = "sex")
+    String sex;
 
 }**/

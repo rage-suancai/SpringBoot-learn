@@ -1,4 +1,4 @@
-package com.dataInteraction.JPAFramework.entity;
+/**package com.dataInteraction.JPAFramework.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -23,4 +23,4 @@ public class Score {
     @Column(name = "uid")
     Integer uid;
 
-}
+}**/

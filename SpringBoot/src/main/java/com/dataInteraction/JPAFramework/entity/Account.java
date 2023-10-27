@@ -1,5 +1,7 @@
-package com.dataInteraction.JPAFramework.entity;
+/**package com.dataInteraction.JPAFramework.entity;
 
+import com.dataInteraction.JPAFramework.entity.AccountDetail;
+import com.dataInteraction.JPAFramework.entity.Score;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -32,4 +34,4 @@ public class Account {
     @OneToMany(cascade = CascadeType.REMOVE)
     List<Score> scoreList;
 
-}
+}**/
