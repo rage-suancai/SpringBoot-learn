@@ -1005,42 +1005,211 @@ QueryWrapper和UpdateWrapper还有专门支持Java8新增的Lambda表达式的�
 不过感觉可读性似乎没有不用Lambda高啊
 
 #### 接口基本操作
+虽然使用MybatisPlus提供的BaseMapper已经很方便了 但是我们的业务中 实际上很多时候也是一样的工作 都是去简单调用底层的Mapper做一个很简单的事情
+那么能不能干脆把Service也给弄个模版? MybatisPlus为我们提供了很方便的CRUD接口 直接实现了各种业务中会用到的增删改查操作
 
+我们只需要继承即可:
 
+```java
+                    @Service
+                    public interface UserService extends IService<User> {
+                      	// 除了继承模版 我们也可以把它当成普通Service添加自己需要的方法
+                    }
+```
 
+接着我们还需要编写一个实现类 这个实现类就是UserService的实现:
 
+```java
+                    @Service // 需要继承ServiceImpl才能实现那些默认的CRUD方法
+                    public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+                    
+                    }
+```
 
+使用起来也很方便 整合了超多方法:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/l5Vkb9dgtJcyL4R.png"/>
 
+比如我们想批量插入一组用户数据到数据库中:
 
+```java
+                    @Test
+                    void contextLoads() {
+    
+                        List<User> users = List.of(new User("xxx"), new User("yyy"));
+                      	// 预设方法中已经支持批量保存了 这相比我们直接用for效率高不少
+                        service.saveBatch(users);
+                        
+                    }
+```
 
+还有更加方便快捷的保存或更新操作 当数据不存在时(通过主键ID判断)则插入新数据 否则更新数据:
 
+```java
+                    @Test
+                    void contextLoads() {
+                        service.saveOrUpdate(new User("aaa"));
+                    }
+```
 
+我们也可以直接使用Service来进行链式查询 写法非常舒服:
 
+```java
+                    @Test
+                    void contextLoads() {
+                    
+                        User one = service.query().eq("id", 1).one();
+                        System.out.println(one);
+                        
+                    }
+```
 
+#### 新版代码生成器
+最后我们再来隆重介绍一下MybatisPlus的代码生成器 这个东西可谓是拯救了千千万万学子的毕设啊
 
+它能够根据数据库做到代码的一键生成 能做到什么程度呢?
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/lGT4g5Y6Heqavsw.png"/>
 
+你没看错 整个项目从Mapper到Controller 所有的东西全部都给你生成好了 你只管把需要补充的业务给写了就行 这是真正的把饭给喂到你嘴边的行为 是广大学子的毕设大杀器
 
+那么我们就来看看 这玩意怎么去用的 首先我们需要先把整个项目的数据库给创建好 创建好之后
+我们继续下一步 这里我们从头开始创建一个项目 感受一下它的强大 首先创建一个普通的SpringBoot项目:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/bIZ9D2cA7XsgSoU.png"/>
 
+接着我们导入一会需要用到的依赖:
 
+```xml
+                    <dependency>
+                        <groupId>com.baomidou</groupId>
+                        <artifactId>mybatis-plus-boot-starter</artifactId>
+                        <version>3.5.3.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.baomidou</groupId>
+                        <artifactId>mybatis-plus-generator</artifactId>
+                        <version>3.5.3.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity-engine-core</artifactId>
+                        <version>2.3</version>
+                    </dependency>
+```
 
+然后再配置一下数据源:
 
+```yaml
+                    spring:
+                        datasource:
+                          url: jdbc:mysql://localhost:3306/test
+                          username: root
+                          password: 123456
+                          driver-class-name: com.mysql.cj.jdbc.Driver
+```
 
+接着我们就可以开始编写自动生成脚本了 这里依然选择测试类 用到FastAutoGenerator作为生成器:
 
+```java
+                    @Test
+                    void contextLoads() {
+    
+                        FastAutoGenerator
+                          		// 首先使用create来配置数据库链接信息
+                                .create(new DataSourceConfig.Builder(dataSource))
+                                .execute();
+                        
+                    }
+```
 
+接着我们配置一下全局设置 这些会影响一会生成的代码:
 
+```java
+                    @Test
+                    void contextLoads() {
+    
+                        FastAutoGenerator
+                                .create(new DataSourceConfig.Builder(dataSource))
+                                .globalConfig(builder -> {
+                                    builder.author("lbw"); // 作者信息 一会会变成注释
+                                    builder.commentDate("2024-01-01"); // 日期信息 一会会变成注释
+                                    builder.outputDir("src/main/java"); // 输出目录设置为当前项目的目录
+                                })
+                                .execute();
+                        
+                    }
+```
 
+然后是打包设置 也就是项目的生成的包等等 这里简单配置一下:
 
+```java
+                    @Test
+                    void contextLoads() {
+    
+                        FastAutoGenerator
+                                ...
+                          		// 打包设置 这里设置一下包名就行 注意跟我们项目包名设置为一致的
+                          		.packageConfig(builder -> builder.parent("com.example"))
+                          		.strategyConfig(builder -> {
+                                    // 设置为所有Mapper添加@Mapper注解
+                                    builder
+                                           .mapperBuilder()
+                                           .mapperAnnotation(Mapper.class)
+                                           .build();
+                                })
+                                .execute();
+                        
+                    }
+```
 
+接着我们就可以直接执行了这个脚本了:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/SdDRqZPnNrkeKjG.png"/>
 
+现在 可以看到我们的项目中已经出现自动生成代码了:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/pKMnwFZEOBmLXDy.png"/>
 
+我们也可以直接运行这个项目:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/CEdRz5wgaoxUjFJ.png"/>
 
+速度可以说是非常之快 一个项目模版就搭建完成了 我们只需要接着写业务就可以了 当然如果各位小伙伴需要更多定制化的话 可以在官网查看其他的配置: https://baomidou.com/pages/981406/
 
+对于一些有特殊要求的用户来说 我们希望能够以自己的模版来进行生产 怎么才能修改它自动生成的代码模版呢 我们可以直接找到mybatis-plus-generator的源码:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/lxaBgGPubOkptCT.png"/>
 
+生成模版都在这个里面有写 我们要做的就是去修改这些模版 变成我们自己希望的样子 由于默认的模版解析引擎为Velocity 我们需要复制以.vm结尾的文件到resource随便一个目录中 然后随便改:
 
+<img src="https://image.itbaima.net/markdown/2023/07/21/gZlbG9JDIa3kSMO.png"/>
+
+接着我们配置一下模版:
+
+```java
+                    @Test
+                    void contextLoads() {
+    
+                        FastAutoGenerator
+                                ...
+                          		.strategyConfig(builder -> {
+                                    builder
+                                            .mapperBuilder()
+                                            .enableFileOverride() // 开启文件重写 自动覆盖新的
+                                            .mapperAnnotation(Mapper.class)
+                                            .build();
+                                })
+                                .templateConfig(builder -> {
+                                    builder.mapper("/template/mapper.java.vm");
+                                })
+                                .execute();
+                        
+                    }
+```
+
+这样 新生成的代码中就是按照我们自己的模版来定义了:
+
+<img src="https://image.itbaima.net/markdown/2023/07/21/K6DufSwG3hdqPsr.png"/>
+
+有了代码生成器 我们工(划)作(水)效率更上一层楼啦~
